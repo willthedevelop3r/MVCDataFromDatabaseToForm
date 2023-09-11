@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MVCApp.Models;
 using System.Diagnostics;
-
 namespace MVCApp.Controllers
 {
     public class HomeController : Controller
@@ -19,6 +18,28 @@ namespace MVCApp.Controllers
         public IActionResult Index()
         {
             return View();
+        }
+
+        public IActionResult ViewEmployees() 
+        {
+
+            var data = _employeeProcessor.LoadEmployees();
+            List<EmployeeModel> employees = new List<EmployeeModel>();
+
+            foreach (var row in data) 
+            {
+                employees.Add(new EmployeeModel
+                {
+                    EmployeeId = row.EmployeeId,
+                    FirstName = row.FirstName,
+                    LastName = row.LastName,
+                    EmailAddress = row.EmailAddress,
+                    ConfirmEmail = row.EmailAddress
+                });
+            }
+            
+
+            return View(employees);
         }
 
         // Get
@@ -38,7 +59,7 @@ namespace MVCApp.Controllers
                     model.FirstName, 
                     model.LastName, 
                     model.EmailAddress);
-                return RedirectToAction("Index");    
+                return RedirectToAction("ViewEmployees");    
             }
 
             return View();
