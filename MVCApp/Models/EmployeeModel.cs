@@ -4,7 +4,6 @@ namespace MVCApp.Models
 {
     public class EmployeeModel
     {
-        public int Id { get; set; }
 
         [Display(Name = "Employee ID")]
         // Range of number characters min, max, and error message
