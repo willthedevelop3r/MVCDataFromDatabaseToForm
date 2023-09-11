@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MVCApp.Models;
 using System.Diagnostics;
-using static DataLibrary.BusinessLogic.EmployeeProcessor;
 
 namespace MVCApp.Controllers
 {
