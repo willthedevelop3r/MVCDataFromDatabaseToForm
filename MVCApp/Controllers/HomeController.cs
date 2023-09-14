@@ -20,6 +20,7 @@ namespace MVCApp.Controllers
             return View();
         }
 
+        // Get
         public IActionResult ViewEmployees() 
         {
 
@@ -42,7 +43,6 @@ namespace MVCApp.Controllers
             return View(employees);
         }
 
-        // Get
         public IActionResult SignUp()
         {
             return View();
