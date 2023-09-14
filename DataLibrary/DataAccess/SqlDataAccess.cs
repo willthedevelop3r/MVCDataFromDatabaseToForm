@@ -26,11 +26,11 @@ namespace DataLibrary.DataAccess
             return _configuration.GetConnectionString(connectionName);
         }
 
-        public List<T> LoadData<T>(string sql) 
+        public List<T> LoadData<T>(string sql, object parameters = null)
         {
             using (IDbConnection cnn = new SqlConnection(GetConnectionString()))
             {
-                return cnn.Query<T>(sql).ToList();
+                return cnn.Query<T>(sql, parameters).ToList();
             }
         }
 

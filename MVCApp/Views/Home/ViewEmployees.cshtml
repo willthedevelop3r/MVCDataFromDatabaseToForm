@@ -24,6 +24,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.EmailAddress)
             </th>
+            <th>
+                Actions
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -41,6 +44,9 @@
             <td>
                 @Html.DisplayFor(modelItem => item.EmailAddress)
             </td>
+                <td>
+                    <a asp-action="EditEmployee" asp-route-id="@item.EmployeeId" class="btn btn-primary">Edit</a>
+                </td>
         </tr>
 }
     </tbody>
