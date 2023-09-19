@@ -9,12 +9,12 @@ using System.Web;
 
 namespace DataLibrary.Service
 {
-    public class EmployeeProcessor
+    public class EmployeeService
     {
 
         private readonly SqlDataAccess _sqlDataAccess;
 
-        public EmployeeProcessor(SqlDataAccess sqlDataAccess)
+        public EmployeeService(SqlDataAccess sqlDataAccess)
         {
             _sqlDataAccess = sqlDataAccess;
         }
@@ -45,17 +45,37 @@ namespace DataLibrary.Service
             return _sqlDataAccess.SaveData(sql, employee);
         }
 
-        public int EditEmployee(EmployeeModel model)
+        public int EditEmployee(EmployeeModel model, int originalEmployeeId)
         {
+            // Fetching the employee details with the new ID (if it exists)
+            var existingEmployee = GetEmployee(model.EmployeeId);
+
+            // Check if the new ID is already taken by another record
+            if (existingEmployee != null && existingEmployee.EmployeeId != originalEmployeeId)
+            {
+                throw new InvalidOperationException("Employee with this ID already exists");
+            }
+
             string sql = @"UPDATE dbo.Employee 
                    SET 
+                       EmployeeId = @EmployeeId,
                        FirstName = @FirstName, 
                        LastName = @LastName, 
                        EmailAddress = @EmailAddress 
-                   WHERE EmployeeId = @EmployeeId";
+                   WHERE EmployeeId = @OriginalEmployeeId";
 
-            return _sqlDataAccess.SaveData(sql, model);
+            var parameters = new
+            {
+                EmployeeId = model.EmployeeId,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                EmailAddress = model.EmailAddress,
+                OriginalEmployeeId = originalEmployeeId
+            };
+
+            return _sqlDataAccess.SaveData(sql, parameters);
         }
+
         public List<EmployeeModel> LoadEmployees()
         {
             string sql = @"SELECT Id, EmployeeId, FirstName, LastName, EmailAddress
@@ -73,6 +93,15 @@ namespace DataLibrary.Service
             var result = _sqlDataAccess.LoadData<EmployeeModel>(sql, param).FirstOrDefault();
 
             return result;
+        }
+
+        public int DeleteEmployee(int id)
+        {
+            string sql = @"DELETE FROM dbo.Employee WHERE EmployeeId = @Id";
+
+            var param = new { Id = id };
+
+            return _sqlDataAccess.SaveData(sql, param);
         }
     }
 }

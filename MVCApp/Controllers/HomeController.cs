@@ -1,5 +1,6 @@
 ﻿using DataLibrary.Service;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using MVCApp.Models;
 using System.Diagnostics;
 namespace MVCApp.Controllers
@@ -7,15 +8,22 @@ namespace MVCApp.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly EmployeeProcessor _employeeProcessor;
+        private readonly EmployeeService _employeeService;
 
-        public HomeController(ILogger<HomeController> logger, EmployeeProcessor employeeProcessor)
+        public HomeController(ILogger<HomeController> logger, EmployeeService employeeService)
         {
             _logger = logger;
-            _employeeProcessor = employeeProcessor;
+            _employeeService = employeeService;
         }
 
         public IActionResult Index()
+        {
+            return View();
+        }
+
+
+        [HttpGet]
+        public IActionResult SignUp()
         {
             return View();
         }
@@ -24,7 +32,7 @@ namespace MVCApp.Controllers
         public IActionResult ViewEmployees() 
         {
 
-            var data = _employeeProcessor.LoadEmployees();
+            var data = _employeeService.LoadEmployees();
             List<EmployeeModel> employees = new List<EmployeeModel>();
 
             foreach (var row in data) 
@@ -42,7 +50,6 @@ namespace MVCApp.Controllers
 
             return View(employees);
         }
-
 
         // Post
         /*  [HttpPost]
@@ -77,32 +84,48 @@ namespace MVCApp.Controllers
                     EmailAddress = model.EmailAddress
                 };
 
-                int recordsCreated = _employeeProcessor.CreateEmployee(dataLibraryModel);
-            /*    _logger.LogInformation("Records updated: {RecordsCreated}", recordsCreated);
-                Console.WriteLine(recordsCreated);*/
-                return RedirectToAction("ViewEmployees");
+                try
+                {
+                    int recordsCreated = _employeeService.CreateEmployee(dataLibraryModel);
+                    _logger.LogInformation("Records updated: {RecordsCreated}", recordsCreated);
+                    return RedirectToAction("ViewEmployees");
+                }
+                catch (SqlException ex)
+                {
+                    if (ex.Number == 2627 || ex.Number == 2601) // Unique constraint violation numbers
+                    {
+                        ModelState.AddModelError(string.Empty, "Employee ID already exists. Please use a different ID.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "An error occurred while saving the data. Please try again later.");
+                        _logger.LogError(ex, "An error occurred while creating a new employee.");
+                    }
+                }
             }
-            
-            return View();
+
+            return View(model);
         }
 
 
         [HttpGet]
         public IActionResult EditEmployee(int id)
         {
-            // Retrieve the employee details using the id
-            var employee = _employeeProcessor.GetEmployee(id);
+            var employee = _employeeService.GetEmployee(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
 
-            // Convert the data library model to your MVC model (if necessary)
             var model = new EditEmployeeModel
             {
+                OriginalEmployeeId = employee.EmployeeId,
                 EmployeeId = employee.EmployeeId,
                 FirstName = employee.FirstName,
                 LastName = employee.LastName,
                 EmailAddress = employee.EmailAddress
             };
 
-            // Pass the model to the view
             return View(model);
         }
 
@@ -112,27 +135,55 @@ namespace MVCApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Map and update employee model (non-password properties)
-                var dataLibraryModel = new DataLibrary.Models.EmployeeModel
+                try
                 {
-                    EmployeeId = model.EmployeeId,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    EmailAddress = model.EmailAddress
-                };
-
-                int recordsUpdated = _employeeProcessor.EditEmployee(dataLibraryModel);
-
-                // Redirect to ViewEmployees if all validations passed
-                return RedirectToAction("ViewEmployees");
+                    var dataLibraryModel = new DataLibrary.Models.EmployeeModel
+                    {
+                        EmployeeId = model.EmployeeId,
+                        FirstName = model.FirstName,
+                        LastName = model.LastName,
+                        EmailAddress = model.EmailAddress
+                    };
+                    int recordsUpdated = _employeeService.EditEmployee(dataLibraryModel, model.OriginalEmployeeId);
+                    return RedirectToAction("ViewEmployees");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    ModelState.AddModelError("EmployeeId", ex.Message);
+                    return View(model);
+                }
             }
 
-            // If ModelState is not valid, it means there are validation errors.
-            // In this case, re-render the EditEmployee view with the same model
-            // to display validation error messages.
             return View(model);
         }
 
+        [HttpGet]
+        public IActionResult DeleteEmployee(int id)
+        {
+            var employee = _employeeService.GetEmployee(id);
+            if (employee == null)
+            {
+                return NotFound(); 
+            }
+
+            var model = new EditEmployeeModel
+            {
+                EmployeeId = employee.EmployeeId,
+                FirstName = employee.FirstName,
+                LastName = employee.LastName,
+                EmailAddress = employee.EmailAddress
+            };
+
+            return View(model);
+        }
+
+        [HttpPost, ActionName("DeleteEmployee")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteEmployeeConfirmed(int id)
+        {
+            _employeeService.DeleteEmployee(id);
+            return RedirectToAction("ViewEmployees");
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

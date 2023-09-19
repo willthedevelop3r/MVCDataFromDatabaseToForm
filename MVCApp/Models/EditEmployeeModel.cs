@@ -6,6 +6,8 @@ namespace MVCApp.Models
 {
     public class EditEmployeeModel
     {
+        public int OriginalEmployeeId { get; set; }
+
         [Display(Name = "Employee ID")]
         [Range(100000, 999999, ErrorMessage = "You need to enter a valid EmployeeId")]
         public int EmployeeId { get; set; }

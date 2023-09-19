@@ -1,14 +1,12 @@
-using DataLibrary.Service; // Adding necessary using directives
+using DataLibrary.Service;
 using DataLibrary.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
-// Register your SqlDataAccess and EmployeeProcessor services here
 builder.Services.AddScoped<SqlDataAccess>();
-builder.Services.AddScoped<EmployeeProcessor>();
+builder.Services.AddScoped<EmployeeService>();
 
 var app = builder.Build();
 
