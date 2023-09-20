@@ -87,7 +87,7 @@ namespace MVCApp.Controllers
                 try
                 {
                     int recordsCreated = _employeeService.CreateEmployee(dataLibraryModel);
-                    _logger.LogInformation("Records updated: {RecordsCreated}", recordsCreated);
+                    _logger.LogInformation("Records created: {RecordsCreated}", recordsCreated);
                     return RedirectToAction("ViewEmployees");
                 }
                 catch (SqlException ex)
@@ -145,6 +145,7 @@ namespace MVCApp.Controllers
                         EmailAddress = model.EmailAddress
                     };
                     int recordsUpdated = _employeeService.EditEmployee(dataLibraryModel, model.OriginalEmployeeId);
+                    _logger.LogInformation("Records updated: {RecordsUpdated}", recordsUpdated);
                     return RedirectToAction("ViewEmployees");
                 }
                 catch (InvalidOperationException ex)
