@@ -1,4 +1,4 @@
-﻿using DataLibrary.Service;
+﻿using DataLibrary.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using MVCApp.Models;
@@ -8,9 +8,9 @@ namespace MVCApp.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly EmployeeService _employeeService;
+        private readonly EmployeeRepository _employeeService;
 
-        public HomeController(ILogger<HomeController> logger, EmployeeService employeeService)
+        public HomeController(ILogger<HomeController> logger, EmployeeRepository employeeService)
         {
             _logger = logger;
             _employeeService = employeeService;

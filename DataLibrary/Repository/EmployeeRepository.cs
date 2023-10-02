@@ -7,14 +7,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace DataLibrary.Service
+namespace DataLibrary.Repository
 {
-    public class EmployeeService
+    public class EmployeeRepository
     {
 
         private readonly SqlDataAccess _sqlDataAccess;
 
-        public EmployeeService(SqlDataAccess sqlDataAccess)
+        public EmployeeRepository(SqlDataAccess sqlDataAccess)
         {
             _sqlDataAccess = sqlDataAccess;
         }

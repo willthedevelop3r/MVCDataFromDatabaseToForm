@@ -1,4 +1,4 @@
-using DataLibrary.Service;
+using DataLibrary.Repository;
 using DataLibrary.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<SqlDataAccess>();
-builder.Services.AddScoped<EmployeeService>();
+builder.Services.AddScoped<EmployeeRepository>();
 
 var app = builder.Build();
 
